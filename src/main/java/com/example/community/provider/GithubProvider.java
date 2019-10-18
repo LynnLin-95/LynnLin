@@ -10,44 +10,40 @@ import java.io.IOException;
 
 @Component
 public class GithubProvider {
-    public String getAccessToken(AccessTokenDTO accessTokenDTO){
+
+    public String getAccessToken(AccessTokenDTO accessTokenDTO) {
         MediaType mediaType = MediaType.get("application/json; charset=utf-8");
-
         OkHttpClient client = new OkHttpClient();
-
-            RequestBody body = RequestBody.create(mediaType,JSON.toJSONString(accessTokenDTO));
-            Request request = new Request.Builder()
-                    .url("https://github.com/login/oauth/access_token")
-                    .post(body)
-                    .build();
-            try (Response response = client.newCall(request).execute()) {
-                String string = response.body().string();
-                String[] split = string.split("&");//access_token=96a9b2268f74ea8d43cb116ef6eead8b50571af4&scope=&token_type=bearer
-                String tokenStr = split[0];
-                String token = tokenStr.split("=")[1];//96a9b2268f74ea8d43cb116ef6eead8b50571af4
-                return token;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-    }
-
-    public GithubUser getUser(String accessToken){
-        OkHttpClient client = new OkHttpClient();
+        RequestBody body = RequestBody.create(mediaType, JSON.toJSONString(accessTokenDTO));
         Request request = new Request.Builder()
-                .url("https://api.github.com/user?access_token="+accessToken)
+                .url("https://github.com/login/oauth/access_token")
+                .post(body)
                 .build();
-        try {
-                Response response = client.newCall(request).execute();
-                String string = response.body().string();
-            GithubUser githubUser = JSON.parseObject(string, GithubUser.class);
-        return githubUser;
-        }
-        catch (Exception e){
+        try (Response response = client.newCall(request).execute()) {
+            String string = response.body().string();
+            String[] split = string.split("&");//access_token=96a9b2268f74ea8d43cb116ef6eead8b50571af4&scope=&token_type=bearer
+            String tokenStr = split[0];
+            String token = tokenStr.split("=")[1];//96a9b2268f74ea8d43cb116ef6eead8b50571af4
+            return token;
+        } catch (Exception e) {
             e.printStackTrace();
         }
-            return null;
+        return null;
+    }
+
+    public GithubUser getUser(String accessToken) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.github.com/user?access_token=" + accessToken)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String string = response.body().string();
+            GithubUser githubUser = JSON.parseObject(string, GithubUser.class);
+            return githubUser;
+        } catch (IOException e) {
         }
+        return null;
+    }
 
 }
-
